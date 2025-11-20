@@ -28,12 +28,12 @@ def booleanize(arr: list):
 
 #Spawn our 10 classes for 0-9
 classes = []
-for x in range(9):
+for x in range(10):
     classes.append(Class())
 
 #Spawn the clauses and automatons for each class
 for v in classes:
-    v.spawn_class(len(images[1]))
+    v.spawn_class(len(images[1])*2, 5, 150)
 
 #TEST on the first 100 images
 for x in range(100):
@@ -43,13 +43,15 @@ for x in range(100):
     bool_features = booleanize(img)
 
     for v in classes:
-        score = v.eval_class(bool_features, True)
+        score = v.eval_class(bool_features, True, 150)
 
         class_scores.append(score)
-        print(f"Score of class {class_scores.index(score)} -> ({score}) ")
+        print(f"[TRAIN] Score of class {v.index} -> ({score}) ")
 
     #find the top scoring class
-    top_class = (max(class_scores)).index()
+    top_class = class_scores.index((max(class_scores)))
+    print(f"[TRAIN] Top class: {v.index}")
+    print(class_scores)
 
     for v in classes:
         if (int(label) == class_scores) and (v.index is top_class):
@@ -62,27 +64,27 @@ for x in range(100):
 eval_score = 0
         
 #EVALUATE on the same 100 images for accuracy
-for x in range(100):
+# for x in range(100):
 
-    img = images[x]
-    label = labels[x]
-    bool_features = booleanize(img)
+#     img = images[x]
+#     label = labels[x]
+#     bool_features = booleanize(img)
 
-    for v in classes:
-        score = v.eval_class(bool_features, True)
+#     for v in classes:
+#         score = v.eval_class(bool_features, True, 150)
 
-        class_scores.append(score)
-        print(f"Score of class {class_scores.index(score)} -> ({score}) ")
+#         class_scores.append(score)
+#         print(f"Score of class {class_scores.index(score)} -> ({score}) ")
 
-    #find the top scoring class
-    top_class = (max(class_scores)).index()
+#     #find the top scoring class
+#     top_class = class_scores.index((max(class_scores)))
+# ##############
+#     for v in classes:
+#         if (v.index is top_class):
+#             if (v.index == int(label)):
+#                 print(f"SUCCESS on identifying: {label}")
+#                 eval_score += 10
+#         else:
+#             print(f"FAILED on identifying: {label}")
 
-    for v in classes:
-        if (v.index is top_class):
-            if (v.index == int(label)):
-                print(f"SUCCESS on identifying: {label}")
-                eval_score += 10
-        else:
-            print(f"FAILED on identifying: {label}")
-
-print(f"Overall success rate: {eval_score}%")
+print(f"Overall success rate: {eval_score}")

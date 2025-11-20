@@ -11,14 +11,15 @@ class Clause:
         self.T = 0
         self.literals = []
 
-        self.spawn_automata()
-
         pass
 
     def spawn_automata(self, features: int):
         
+        # create automata and initialize corresponding AT_states entries
         for x in range(features*2):
             self.automata.append(Automata())
+            # default AT state True so the clause evaluation lets literals decide
+            self.AT_states.append(True)
 
     def eval_automata(self):
 
@@ -29,10 +30,11 @@ class Clause:
 
         self.T = T
 
-        self.S1 = (random.random() <= (1 // s))
-        self.S2 = (random.random() >= (1 // s))
+        self.S1 = (random.random() <= (1 / s))
+        self.S2 = (random.random() >= (1 / s))
 
     def type1_feedback(self, cl: bool, literal: bool, automata: Automata):
+        print(f"Type1 feedback! {cl}")
         if cl:
             if literal:
                 if self.S2:
@@ -51,6 +53,7 @@ class Clause:
                 pass
 
     def type2_feedback(self, cl: bool, literal: bool, automata: Automata):
+        print("Type2 feedback!")
         if cl:
             if literal:
                 pass
@@ -66,19 +69,23 @@ class Clause:
         
         csum_clip = np.clip(class_sum, -self.T, self.T)
 
-        c1 = (random.random() <= ((self.T-csum_clip) // 2*self.T))
-        c2 = (random.random() <= ((self.T-csum_clip) // 2*self.T))
+        # c1 = (random.random() <= ((self.T-csum_clip) // 2*self.T))
+        # c2 = (random.random() <= ((self.T-csum_clip) // 2*self.T))
+
+        p = (self.T - csum_clip) / (2 * self.T)
+        c1 = random.random() <= p
+        c2 = random.random() <= p
 
         if yc:
             if c1:
                 if self.state:
 
-                    for literal, automata in self.literals, self.automata:
+                    for literal, automata in zip(self.literals, self.automata):
                         self.type1_feedback(self.state, literal, automata)
                 
                 else:
 
-                    for literal, automata in self.literals, self.automata:
+                    for literal, automata in zip(self.literals, self.automata):
                         self.type2_feedback(self.state, literal, automata)
 
             else:
@@ -88,17 +95,17 @@ class Clause:
             if c2:
                 if self.state:
 
-                    for literal, automata in self.literals, self.automata:
+                    for literal, automata in zip(self.literals, self.automata):
                         self.type2_feedback(self.state, literal, automata)
 
                 else:
 
-                    for literal, automata in self.literals, self.automata:
+                    for literal, automata in zip(self.literals, self.automata):
                         self.type1_feedback(self.state, literal, automata)
 
 
 
-    def eval_clause(self, arr: list, training: bool):
+    def eval_clause(self, arr: list):
 
         #create inverse literals
         lits = np.array(arr)
@@ -108,14 +115,12 @@ class Clause:
 
         out_AND = []    
 
-        for literal, state in self.literals, self.AT_states:
-            
-            #AT excludes the literal, so be true to let other AT's decide
+        for literal, state in zip(self.literals, self.AT_states):
+            # AT excludes the literal, so be True to let other ATs decide
             if state:
                 out_AND.append(True)
-            
-            #AT didnt exclude, let the literal decide.
             else:
+                # AT didn't exclude, let the literal decide
                 out_AND.append(literal)
 
         if all(out_AND):
