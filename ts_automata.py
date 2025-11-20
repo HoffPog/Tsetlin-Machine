@@ -18,7 +18,7 @@ class Automata:
             # the automata is at a max value
             pass
     
-    def penalise(self):
+    def penalize(self):
         if (self.state or -self.state) is not self.max_state // 2:
             if self.state > 0:
                 self.state -= 1
@@ -28,3 +28,9 @@ class Automata:
         else:
             # the automata is at a max value
             pass
+
+    def output(self):
+        if self.state > 0:
+            return True
+        else:
+            return False

@@ -26,12 +26,6 @@ def booleanize(arr: list):
 
 a_1 = Automata(10)
 
-for x in range(10):
-    a_1.reward()
-
-for x in range(10):
-    a_1.penalise()
-
 
 
 #kind of pointless, for visualisation
