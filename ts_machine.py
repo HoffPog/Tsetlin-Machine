@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
+from ts_automata import Automata
+
 loader = MNISTLoader()
 images, labels = loader.load()
 assert len(images) == 60000 and len(labels) == 60000
@@ -21,6 +23,16 @@ def booleanize(arr: list):
         else:
             arr[i] = 0
     return arr
+
+a_1 = Automata(10)
+
+for x in range(10):
+    a_1.reward()
+
+for x in range(10):
+    a_1.penalise()
+
+
 
 #kind of pointless, for visualisation
 img_reshaped = booleanize(img).reshape(28, 28)
