@@ -4,7 +4,7 @@ class Automata:
         # +ve = Include
         # -ve = Exclude
         self.state = 0
-        self.max_state = 10 # changes the resolution of the automata
+        self.max_state = 100 # changes the resolution of the automata
         pass
 
     def reward(self):

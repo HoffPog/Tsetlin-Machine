@@ -34,7 +34,6 @@ class Clause:
         self.S2 = (random.random() >= (1 / s))
 
     def type1_feedback(self, cl: bool, literal: bool, automata: Automata):
-        print(f"Type1 feedback! {cl}")
         if cl:
             if literal:
                 if self.S2:
@@ -53,7 +52,6 @@ class Clause:
                 pass
 
     def type2_feedback(self, cl: bool, literal: bool, automata: Automata):
-        print("Type2 feedback!")
         if cl:
             if literal:
                 pass
@@ -109,19 +107,21 @@ class Clause:
 
         #create inverse literals
         lits = np.array(arr)
-        inv_lits = np.invert(lits)
+        inv_lits = np.logical_not(lits, )
 
-        self.literals = np.append(lits, inv_lits)
+        self.literals = np.concatenate((lits, inv_lits))
 
-        out_AND = []    
+        out_AND = []
+
+        self.eval_automata()    
 
         for literal, state in zip(self.literals, self.AT_states):
-            # AT excludes the literal, so be True to let other ATs decide
+            # AT doesnt exclude, allow whatever literal
             if state:
-                out_AND.append(True)
-            else:
-                # AT didn't exclude, let the literal decide
                 out_AND.append(literal)
+            else:
+                # AT excluded, be true so others can decide
+                out_AND.append(True)
 
         if all(out_AND):
             return True
