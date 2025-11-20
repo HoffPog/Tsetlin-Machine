@@ -6,6 +6,10 @@ class Clause:
     def __init__(self):
         self.automata = []
         self.AT_states = []
+        self.state = False
+        self.active_literal = 0
+        self.T = 0
+        self.literals = []
         pass
 
     def spawn_automata(self, features: int):
@@ -20,10 +24,12 @@ class Clause:
 
     def set_feedback_params(self, s, T):
 
+        self.T = T
+
         self.S1 = (random.random() <= (1 // s))
         self.S2 = (random.random() >= (1 // s))
 
-    def type1_feedback(self, cl: bool,literal: bool, automata: Automata):
+    def type1_feedback(self, cl: bool, literal: bool, automata: Automata):
         if cl:
             if literal:
                 if self.S2:
@@ -53,17 +59,53 @@ class Clause:
         else:
             pass
 
+    def train_claus(self, yc: bool, class_sum: int):
+        
+        csum_clip = np.clip(class_sum, -self.T, self.T)
+
+        c1 = (random.random() <= ((self.T-csum_clip) // 2*self.T))
+        c2 = (random.random() <= ((self.T-csum_clip) // 2*self.T))
+
+        if yc:
+            if c1:
+                if self.state:
+
+                    for literal, automata in self.literals, self.automata:
+                        self.type1_feedback(self.state, literal, automata)
+                
+                else:
+
+                    for literal, automata in self.literals, self.automata:
+                        self.type2_feedback(self.state, literal, automata)
+
+            else:
+                pass
+
+        else:
+            if c2:
+                if self.state:
+
+                    for literal, automata in self.literals, self.automata:
+                        self.type2_feedback(self.state, literal, automata)
+
+                else:
+
+                    for literal, automata in self.literals, self.automata:
+                        self.type1_feedback(self.state, literal, automata)
+
+
+
     def eval_clause(self, arr: list, training: bool):
 
         #create inverse literals
         lits = np.array(arr)
         inv_lits = np.invert(lits)
 
-        literals = np.append(lits, inv_lits)
+        self.literals = np.append(lits, inv_lits)
 
         out_AND = []    
 
-        for literal, state in literals, self.AT_states:
+        for literal, state in self.literals, self.AT_states:
             
             #AT excludes the literal, so be true to let other AT's decide
             if state:

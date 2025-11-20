@@ -17,7 +17,7 @@ class Class:
         for x in range(claus_count // 2):
             self.neg_clauses.append(Clause())
 
-    def eval_class(self, data: list, training: bool):
+    def eval_class(self, data: list, training: bool, T):
 
         for claus in self.pos_clauses:
             if claus.eval_clause(data, training):
@@ -26,3 +26,11 @@ class Class:
                 self.sum -= 1
 
         return self.sum
+    
+    def train_downstream(self, yc: bool):
+
+        for claus in self.pos_clauses:
+            claus.train_claus(yc, self.sum)
+
+        for claus in self.neg_clauses:
+            claus.train_claus(yc, self.sum)
