@@ -1,5 +1,6 @@
 from ts_automata import Automata
 import numpy as np
+import random
 
 class Clause:
     def __init__(self):
@@ -17,13 +18,49 @@ class Clause:
         for i,automaton in enumerate(self.automata):
             self.AT_states[i] = automaton.output()
 
-    def eval_clause(self, arr: list):
+    def set_feedback_params(self, s, T):
+
+        self.S1 = (random.random() <= (1 // s))
+        self.S2 = (random.random() >= (1 // s))
+
+    def type1_feedback(self, cl: bool,literal: bool, automata: Automata):
+        if cl:
+            if literal:
+                if self.S2:
+                    automata.reward()
+                else:
+                    pass
+            else:
+                if self.S1:
+                    automata.penalize()
+                else:
+                    pass
+        else:
+            if self.S1:
+                automata.penalize()
+            else:
+                pass
+
+    def type2_feedback(self, cl: bool, literal: bool, automata: Automata):
+        if cl:
+            if literal:
+                pass
+            else:
+                if automata.output():
+                    automata.reward()
+                else:
+                    pass
+        else:
+            pass
+
+
+    def eval_clause(self, arr: list, training: bool):
 
         #create inverse literals
         lits = np.array(arr)
         inv_lits = np.invert(lits)
 
-        literals = lits.append(inv_lits)
+        literals = np.append(lits, inv_lits)
 
         out_AND = []    
 

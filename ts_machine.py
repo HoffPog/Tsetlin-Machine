@@ -24,10 +24,10 @@ def booleanize(arr: list):
             arr[i] = 0
     return arr
 
-a_1 = Automata(10)
+a_1 = Automata()
 
 
 
 #kind of pointless, for visualisation
-img_reshaped = booleanize(img).reshape(28, 28)
+img_reshaped = booleanize(img)
 print(img_reshaped)

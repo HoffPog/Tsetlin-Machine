@@ -1,10 +1,10 @@
 class Automata:
-    def __init__(self, max_state):
+    def __init__(self):
 
         # +ve = Include
         # -ve = Exclude
         self.state = 0
-        self.max_state = max_state # changes the resolution of the automata
+        self.max_state = 10 # changes the resolution of the automata
         pass
 
     def reward(self):
