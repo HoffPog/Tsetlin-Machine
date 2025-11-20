@@ -53,7 +53,6 @@ class Clause:
         else:
             pass
 
-
     def eval_clause(self, arr: list, training: bool):
 
         #create inverse literals
