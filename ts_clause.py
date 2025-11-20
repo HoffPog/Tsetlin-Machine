@@ -10,6 +10,9 @@ class Clause:
         self.active_literal = 0
         self.T = 0
         self.literals = []
+
+        self.spawn_automata()
+
         pass
 
     def spawn_automata(self, features: int):
