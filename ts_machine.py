@@ -13,4 +13,15 @@ assert len(train_images) == 10000 and len(train_labels) == 10000
 img = images[1]
 label = labels[1]
 
-img_reshaped = img.reshape(28, 28)
+#convert to boolean features
+def booleanize(arr: list):
+    for i,pixel_val in enumerate(arr):
+        if pixel_val > 0:
+            arr[i] = 1
+        else:
+            arr[i] = 0
+    return arr
+
+#kind of pointless, for visualisation
+img_reshaped = booleanize(img).reshape(28, 28)
+print(img_reshaped)
