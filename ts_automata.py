@@ -3,34 +3,20 @@ class Automata:
 
         # +ve = Include
         # -ve = Exclude
-        self.state = 0
         self.max_state = 100 # changes the resolution of the automata
+        self.state = 0
         pass
 
     def reward(self):
-        if (self.state or -self.state) is not self.max_state // 2:
-            if self.state > 0:
-                self.state += 1
-            else:
-                self.state -= 1
-        
-        else:
-            # the automata is at a max value
-            pass
-    
+        boundary = self.max_state // 2
+        if self.state < boundary:
+            self.state += 1
+
     def penalize(self):
-        if (self.state or -self.state) is not self.max_state // 2:
-            if self.state > 0:
-                self.state -= 1
-            else:
-                self.state += 1
-        
-        else:
-            # the automata is at a max value
-            pass
+        boundary = self.max_state // 2
+        if self.state > -boundary:
+            self.state -= 1
+
 
     def output(self):
-        if self.state > 0:
-            return True
-        else:
-            return False
+        return self.state > 0

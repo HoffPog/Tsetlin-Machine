@@ -3,6 +3,14 @@ import numpy as np
 from PIL import Image
 from ts_automata import Automata
 from ts_class import Class
+import timeit
+import random
+a = '''
+from math import sqrt
+def example():
+    mylist = [sqrt(x) for x in range(100)]
+'''
+t = timeit.timeit(a, number=1000000) * 1e3
 
 loader = MNISTLoader()
 images, labels = loader.load()
@@ -18,12 +26,14 @@ class_scores = []
 
 #convert to boolean features
 def booleanize(arr: list):
-    for i,pixel_val in enumerate(arr):
-        if pixel_val > 0:
-            arr[i] = True
-        else:
-            arr[i] = False
-    return arr
+    # for i,pixel_val in enumerate(arr):
+    #     if pixel_val > 0:
+    #         arr[i] = True
+    #     else:
+    #         arr[i] = False
+    # return arr
+    return [pixel_val > 0 for pixel_val in arr]
+
 
 #Spawn our 10 classes for 0-9
 classes = []
@@ -31,59 +41,81 @@ for x in range(10):
     classes.append(Class())
 
 #Spawn the clauses and automatons for each class
+# c = 0
+# for v in classes:
+#     v.spawn_class(len(images[1])*2, 5, 150, c)
+#     c += 1
+
+c = 0
 for v in classes:
-    v.spawn_class(len(images[1])*2, 5, 150)
+    v.spawn_class(len(images[1]), 10, 100, c)
+    c+= 1
 
-#TEST on the first 100 images
-for x in range(100):
 
-    img = images[x]
-    label = labels[x]
-    bool_features = booleanize(img)
 
-    for v in classes:
-        score = v.eval_class(bool_features, True, 150)
+DEBUG_ARR = []
 
-        class_scores.append(score)
-        print(f"[TRAIN] Score of class {v.index} -> ({score}) ")
+#TRAINING
+for i in range(10):
+    for x in range(1000):
+        l = random.randint(1,1000)
+        img = images[l]
+        label = labels[l]
+        bool_features = booleanize(img)
 
-    #find the top scoring class
-    top_class = class_scores.index((max(class_scores)))
-    print(f"[TRAIN] Top class: {v.index}")
-    print(class_scores)
+        class_scores = []
+        for v in classes:
+            score = v.eval_class(bool_features, True, 150)
+            class_scores.append(score)
 
-    for v in classes:
-        if (int(label) == class_scores) and (v.index is top_class):
-            v.train_downstream(True)
+        # Provide feedback to all classes
+        # for i, v in enumerate(classes):
+        #     y_c = 1 if i == int(label) else 0
+        #     v.train_downstream(y_c)
+
+        # Train the class the data belonged to.
+        for i, v in enumerate(classes):
+            if v.index == int(label):
+                y_c = False
+                v.train_downstream(y_c)
+            
+        # Train a random class
+        r = random.randint(0,9)
+        if classes[r].index == int(label):
+            y_c = True
+            classes[r].train_downstream(y_c)
         else:
-            v.train_downstream(False)
+            y_c = False
+            classes[r].train_downstream(y_c)
 
-    class_scores = [] #reset scores
+
+
+print("Training Done.")
+
+runs = []
+
+#EVALUATE
+
 
 eval_score = 0
-        
-#EVALUATE on the same 100 images for accuracy
-for x in range(100):
-
-    img = images[x]
-    label = labels[x]
+for x in range(1000):
+    l = x+1000
+    img = images[l]
+    label = labels[l]
     bool_features = booleanize(img)
 
-    for v in classes:
-        score = v.eval_class(bool_features, True, 150)
+    class_scores = [v.eval_class(bool_features, False, 150) for v in classes]
+    top_class = class_scores.index(max(class_scores))
+    if classes[top_class].index == int(label):
+        eval_score += 1
 
-        class_scores.append(score)
-        print(f"Score of class {class_scores.index(score)} -> ({score}) ")
+accuracy = eval_score / 100 * 100
+print(f"Accuracy: {accuracy:.2f}%")
+print(round(t, 3), "ms")
+runs.append(accuracy)
 
-    #find the top scoring class
-    top_class = class_scores.index((max(class_scores)))
-##############
-    for v in classes:
-        if (v.index is top_class):
-            if (v.index == int(label)):
-                print(f"SUCCESS on identifying: {label}")
-                eval_score += 10
-        else:
-            print(f"FAILED on identifying: {label}")
-
-print(f"Overall success rate: {eval_score}")
+# print("------------------")
+# print(f"{runs}")
+# print("------------------")
+t = timeit.timeit(a, number=1000000) * 1e3
+print(round(t, 3), "ms")

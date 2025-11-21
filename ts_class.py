@@ -9,9 +9,9 @@ class Class:
         self.index = -1
         pass
 
-    def spawn_class(self, features: int, s, T):
-        claus_count = 10 #adjustable
-        self.index += 1
+    def spawn_class(self, features: int, s, T, index: int):
+        claus_count = 50 #adjustable
+        self.index = index
 
         for x in range(claus_count // 2):
             self.pos_clauses.append(Clause())
@@ -32,16 +32,18 @@ class Class:
         self.sum = 0
 
         for claus in self.pos_clauses:
+
             if claus.eval_clause(data):
                 self.sum += 1
             else:
                 self.sum -= 1
 
         for claus in self.neg_clauses:
+
             if claus.eval_clause(data):
-                self.sum += 1
+                self.sum += -1
             else:
-                self.sum -= 1
+                self.sum += 1
 
         return self.sum
     

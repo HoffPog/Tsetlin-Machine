@@ -30,23 +30,29 @@ class Clause:
 
         self.T = T
 
-        self.S1 = (random.random() <= (1 / s))
-        self.S2 = (random.random() >= (1 / s))
+        # self.S1 = (random.random() <= (1 / s))
+        # self.S2 = (random.random() >= (1 / s))
+
+        self.s = s
 
     def type1_feedback(self, cl: bool, literal: bool, automata: Automata):
+
+        S1 = (random.random() <= (1 / self.s))
+        S2 = (random.random() >= (1 / self.s))
+
         if cl:
             if literal:
-                if self.S2:
+                if S2:
                     automata.reward()
                 else:
                     pass
             else:
-                if self.S1:
+                if S1:
                     automata.penalize()
                 else:
                     pass
         else:
-            if self.S1:
+            if S1:
                 automata.penalize()
             else:
                 pass
@@ -67,13 +73,10 @@ class Clause:
         
         csum_clip = np.clip(class_sum, -self.T, self.T)
 
-        # c1 = (random.random() <= ((self.T-csum_clip) // 2*self.T))
-        # c2 = (random.random() <= ((self.T-csum_clip) // 2*self.T))
-
         p = (self.T - csum_clip) / (2 * self.T)
         c1 = random.random() <= p
         c2 = random.random() <= p
-
+        #print(f"P: {p} | c1: {c1} | c2: {c2} | yc: {yc} | c_sum: {csum_clip}")
         if yc:
             if c1:
                 if self.state:
@@ -123,7 +126,15 @@ class Clause:
                 # AT excluded, be true so others can decide
                 out_AND.append(True)
 
-        if all(out_AND):
-            return True
-        else:
-            return False
+        result = all(out_AND)
+        self.state = bool(result)
+        # if self.state:
+        #     print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+        # else:
+        #     print("eeeee")
+        return result
+
+        # if all(out_AND):
+        #     return True
+        # else:
+        #     return False
