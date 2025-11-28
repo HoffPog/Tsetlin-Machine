@@ -1,22 +1,22 @@
+import random
+
 class Automata:
     def __init__(self):
 
         # +ve = Include
         # -ve = Exclude
-        self.max_state = 100 # changes the resolution of the automata
-        self.state = 0
+        self.N = 10 # changes the resolution of the automata
+        self.state = random.randint(-1,1)
         pass
 
     def reward(self):
-        boundary = self.max_state // 2
-        if self.state < boundary:
+        if self.state < 2 * self.N:
             self.state += 1
 
     def penalize(self):
-        boundary = self.max_state // 2
-        if self.state > -boundary:
+        if self.state > 1:
             self.state -= 1
 
 
     def output(self):
-        return self.state > 0
+        return self.state > self.N

@@ -70,6 +70,7 @@ class Clause:
             pass
 
     def train_claus(self, yc: bool, class_sum: int):
+        #print(class_sum)
         
         csum_clip = np.clip(class_sum, -self.T, self.T)
 

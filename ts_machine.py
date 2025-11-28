@@ -5,19 +5,14 @@ from ts_automata import Automata
 from ts_class import Class
 import timeit
 import random
-a = '''
-from math import sqrt
-def example():
-    mylist = [sqrt(x) for x in range(100)]
-'''
-t = timeit.timeit(a, number=1000000) * 1e3
+import matplotlib.pyplot as plt
 
 loader = MNISTLoader()
-images, labels = loader.load()
+images, labels = loader.load(train=True)
 assert len(images) == 60000 and len(labels) == 60000
 
-train_images, train_labels = loader.load(train=False)
-assert len(train_images) == 10000 and len(train_labels) == 10000
+test_images, test_labels = loader.load(train=False)
+assert len(test_images) == 10000 and len(test_labels) == 10000
 
 # img = images[1]
 # label = labels[1]
@@ -55,39 +50,65 @@ for v in classes:
 
 DEBUG_ARR = []
 
+CLASS_SCORE_HISTORY = []
+
+indices = list(range(len(images)))
+random.shuffle(indices)
+ccc = 0
 #TRAINING
-for i in range(10):
-    for x in range(1000):
-        l = random.randint(1,1000)
-        img = images[l]
-        label = labels[l]
+for epoch in range(10):
+
+    for image_num in range(100):
+
+        train_index = image_num
+        img = images[train_index]
+        label = labels[train_index]
         bool_features = booleanize(img)
 
         class_scores = []
         for v in classes:
-            score = v.eval_class(bool_features, True, 150)
+            score = v.eval_class(bool_features)
+            #print(f"C_score: {score}")
             class_scores.append(score)
 
         # Provide feedback to all classes
         # for i, v in enumerate(classes):
         #     y_c = 1 if i == int(label) else 0
         #     v.train_downstream(y_c)
-
+ 
         # Train the class the data belonged to.
-        for i, v in enumerate(classes):
-            if v.index == int(label):
+        for i, k in enumerate(classes):
+            if k.index == int(label):
                 y_c = False
-                v.train_downstream(y_c)
+                k.train_downstream(y_c)
+                #print(f"Real Class Training: {k.index}")
+
+        # for i, k in enumerate(classes):
+        #     y_c = (k.index == int(label))
+        #     k.train_downstream(y_c)
+
+        
             
         # Train a random class
         r = random.randint(0,9)
         if classes[r].index == int(label):
             y_c = True
             classes[r].train_downstream(y_c)
+            #print(f"Real Random Class Training: {r}")
         else:
             y_c = False
             classes[r].train_downstream(y_c)
+            #print(f"False Random Class Training: {r}")
 
+        print(f"Iter: {ccc}, Epoch: {epoch}, Label: {label} | {class_scores}")
+
+        CLASS_SCORE_HISTORY.append(class_scores)
+
+        ccc += 1
+
+    print(f"Epoch: {epoch} | {class_scores}")
+
+    # CLASS_SCORE_HISTORY.append(class_scores)
 
 
 print("Training Done.")
@@ -96,26 +117,48 @@ runs = []
 
 #EVALUATE
 
+DEBUG_class_guesses = [0,0,0,0,0,0,0,0,0,0]
 
 eval_score = 0
-for x in range(1000):
-    l = x+1000
-    img = images[l]
-    label = labels[l]
+for image_no in range(100):
+    l = image_no
+    img = test_images[l]
+    label = test_labels[l]
     bool_features = booleanize(img)
 
-    class_scores = [v.eval_class(bool_features, False, 150) for v in classes]
+    class_scores = [v.eval_class(bool_features) for v in classes]
     top_class = class_scores.index(max(class_scores))
-    if classes[top_class].index == int(label):
+    print(f"{label} | Winner: {top_class} | {class_scores}")
+
+    DEBUG_class_guesses[top_class] += 1
+
+    if top_class == int(label):
         eval_score += 1
 
-accuracy = eval_score / 100 * 100
+accuracy = eval_score / len(test_images) * 100
 print(f"Accuracy: {accuracy:.2f}%")
-print(round(t, 3), "ms")
 runs.append(accuracy)
+print(DEBUG_class_guesses)
 
 # print("------------------")
 # print(f"{runs}")
 # print("------------------")
-t = timeit.timeit(a, number=1000000) * 1e3
-print(round(t, 3), "ms")
+# t = timeit.timeit(a, number=1000000) * 1e3
+# print(round(t, 3), "ms")
+
+CLASS_SCORE_HISTORY = np.array(CLASS_SCORE_HISTORY)
+epochs = CLASS_SCORE_HISTORY.shape[0]
+
+for cls in range(CLASS_SCORE_HISTORY.shape[1]):
+    plt.plot(
+        range(epochs),
+        CLASS_SCORE_HISTORY[:, cls],
+        label=f"Class {cls}"
+    )
+
+plt.xlabel("Image Count")
+plt.ylabel("Class score")
+plt.title("Class scores throughout training")
+plt.legend()
+plt.grid(True)
+plt.show()
